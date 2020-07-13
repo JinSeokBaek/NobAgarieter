@@ -2,4 +2,5 @@
 TIS   SpringFramework 다이어트 커뮤니티 사이트
 <hr>
 <p>제작기간 2018.05.28~2018.07.06</p>
-<iframe width="640" height="360" src="https://www.youtube.com/embed/F6eZcHsQyBk" frameborder="0" gesture="media" allowfullscreen=""></iframe>
+<h2>YouYube</h2>
+[![](http://img.youtube.com/vi/F6eZcHsQyBk/0.jpg)](http://www.youtube.com/watch?v=F6eZcHsQyBk "")
