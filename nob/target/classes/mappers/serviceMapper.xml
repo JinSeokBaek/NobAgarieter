@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nob.mapper.ServiceMapper">
+
+	<select id="listAll" resultType="CalorieVO">
+		select
+		*
+		from
+		tbl_calorie
+	</select>
+	<select id="read" resultType="CalorieVO">
+		select
+		*
+		from
+		tbl_calorie
+		where
+		c_no=#{cno}
+	</select>
+	
+	<select id="autocomplete" resultType="CalorieVO">
+		select
+		*
+		from
+		tbl_calorie
+		where
+		c_name like CONCAT('%',#{keyword},'%')
+	</select>
+	
+	<select id="listVideo" resultType="VideoVO">
+		select
+		*
+		from
+		tbl_video
+	</select>
+	<insert id="insertVideo">
+		insert into
+		tbl_video(v_link,v_title,v_desc,v_category)
+		values
+		(#{v_link},#{v_title},#{v_desc},#{v_category})
+	</insert>
+	<delete id="delVideo">
+		delete from tbl_video
+		where v_id=#{vid}
+	</delete>
+	
+</mapper>

@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nob.mapper.GroupMapper">
+
+	<!-- 그룹 아이디로 그룹 유저 목록 불러오기 -->
+	<select id="getGroupMember" resultType="GroupMemberVO">
+		select
+		gm_no,tbl_user.u_no,u_nickname,gm_grant,gm_joindate
+		from
+		tbl_user join tbl_group_member
+		on tbl_user.u_no=tbl_group_member.u_no
+		where tbl_group_member.g_id=#{gid}
+	</select>
+	
+	<!-- 그룹생성 -->
+	<insert id="makeGroup">
+		insert into tbl_group(u_no,g_name,g_category,g_subcategory)
+		values(#{u_no},#{g_name},#{g_category},#{g_subcategory})
+	</insert>
+	
+	<!-- 그룹삭제 -->
+	<delete id="delGroup">
+		delete from tbl_group
+		where g_id=#{gid}
+	</delete>
+	
+	<!-- 그룹삭제시 그룹원전부 삭제 -->
+	<delete id="delGroupMember">
+		delete from tbl_group_member
+		where g_id=#{gid}
+	</delete>
+	
+	<!-- 그룹생성하자 마자 사용자 어드민으로 추가 -->
+	<insert id="joinMakedGroup">
+		insert into tbl_group_member(u_no,g_id,gm_grant)
+		values(#{u_no},LAST_INSERT_ID(),"M")
+	</insert>
+	
+	<!-- 그룹 가입 -->
+	<insert id="joinGroup">
+		insert into tbl_group_member(u_no,g_id,gm_grant)
+		values(#{u_no},#{g_id},"U")
+	</insert>
+	
+	<!-- 그룹맴버확인 -->
+	<select id="isGroupMember" resultType="Integer">
+		select count(*) from tbl_group_member
+		where g_id=#{gid} and u_no=#{uno}
+	</select>
+	
+	<!-- 그룹 이름 확인 -->
+	<select id="checkName" resultType="Integer">
+		select count(*) from tbl_group
+		where g_name=#{gname}
+	</select>
+	
+	<!-- 권한 확인 -->
+	<select id="isAdmin" resultType="String">
+		select gm_grant from tbl_group_member
+		where g_id=#{gid} and u_no=#{uno}
+	</select>
+	
+	<!-- 그룹장확인 -->
+	<select id="isMainAdmin" resultType="Integer">
+		select count(*) from tbl_group
+		where g_id=#{gid} and u_no=#{uno}
+	</select>
+	
+	<!-- 그룹리스트 -->
+	<select id="groupList" resultType="GroupVO">
+		select *
+        from (select a.g_id,a.u_no,g_name ,g_regdate,g_category,g_subcategory,gm_no,gm_joindate,gm_grant from tbl_group as a
+		left join (select * from tbl_group_member where u_no=#{u_no}) as b
+		on a.g_id=b.g_id) as c
+        left join (select count(*) as m_total, d.g_id from tbl_group_member as d group by d.g_id) as e
+        on e.g_id=c.g_id
+        order by m_total desc
+        limit 0,10
+	</select>
+	
+	<!-- 그룹원 권한 부여 -->
+	<update id="setAdmin">
+		update tbl_group_member
+		set gm_grant='${gmgrant}'
+		where g_id=#{gid} and u_no=#{uno}
+	</update>
+	
+	<!-- 그룹원 탈퇴 -->
+	<delete id="delMember">
+		delete from tbl_group_member
+		where g_id=#{gid} and u_no=#{uno}
+	</delete>
+	
+	<!-- 그룹 리스트 -->
+	<select id="groupList2" resultType="GroupVO">
+		select *
+        from (select a.g_id,a.u_no,g_name ,g_regdate,g_category,g_subcategory,gm_no,gm_joindate,gm_grant from tbl_group as a
+		left join (select * from tbl_group_member where u_no=#{u_no}) as b
+		on a.g_id=b.g_id) as c
+        left join (select count(*) as m_total, d.g_id from tbl_group_member as d group by d.g_id) as e
+        on e.g_id=c.g_id
+        order by c.g_id asc
+	</select>
+
+	<select id="listPage" resultType="GroupBoardVO">
+		select *,bb.u_no as l_user from
+      (select
+      gb_no,g_id,gb_content,gb_regdate,gb_replycnt,u_no,IFNULL(l_total,"0")
+      as l_total, u_nickname
+      from (select
+      gb.gb_no, gb.g_id, gb.gb_content, gb.gb_regdate, gb.gb_replycnt,user.u_no, user.u_email, user.u_pwd, user.u_name, user.u_gender, 
+        user.u_nickname, user.u_bmi, user.u_joindate, user.u_Authkey, user.u_updatedate
+      from
+      tbl_group_board as gb
+      left join tbl_user as user on gb.u_no = user.u_no
+      where 
+      g_id=#{g_id}
+      order by gb_no desc
+        ) as a
+      left join (select count(*) as
+      l_total,l_bno from tbl_like where b_name='5'
+      group by l_bno) as b
+      on
+      b.l_bno=a.gb_no
+      where gb_no>0
+      and g_id=#{g_id}
+      <include refid="search"></include>
+      order by gb_no desc) as aa
+      left join (select * from tbl_like where b_name='5' and u_no=#{u_no}
+      group
+      by u_no,l_bno) as bb
+      on aa.gb_no=bb.l_bno
+   <![CDATA[
+      order by aa.gb_no desc
+      limit #{cri.groupPageStart}, #{cri.groupPerPage}
+   ]]>
+      
+	</select>
+
+	<select id="count" resultType="int">
+		select count(gb_no) from tbl_group_board
+		where g_id = #{g_id} and gb_no>0
+	</select>
+	
+	<insert id="create">
+	insert into tbl_group_board(g_id, gb_title, gb_content, u_no)
+	values(#{g_id}, #{gb_title}, #{gb_content}, #{u_no})
+	</insert>
+	
+	<update id="update">
+		update tbl_group_board set gb_content = #{gb_content},
+		gb_regdate = now(), gb_title = #{gb_title}
+		where gb_no = #{gb_no} and g_id = #{g_id}
+	</update>
+
+	<delete id="delete">
+		delete from tbl_group_board where g_id =#{g_id} and gb_no = #{gb_no}
+	</delete>
+	
+	<select id="groupListCategory" resultType="GroupVO">
+		select *
+        from (select a.g_id,a.u_no,g_name ,g_regdate,g_category,g_subcategory,gm_no,gm_joindate,gm_grant from tbl_group as a
+		left join (select * from tbl_group_member where u_no=#{u_no}) as b
+		on a.g_id=b.g_id) as c
+        left join (select count(*) as m_total, d.g_id from tbl_group_member as d group by d.g_id) as e
+        on e.g_id=c.g_id
+        where g_category like CONCAT('%',#{g_category},'%')
+        order by m_total desc
+	</select>
+	
+	
+	
+	<delete id="delBoard">
+		delete from tbl_group_board
+		where g_id=#{gid}
+	</delete>
+	
+	
+	<delete id="delReply">
+		 delete from tbl_group_reply 
+		 where gb_no in(select gb_no from tbl_group_board where g_id=#{gid});
+	</delete>
+	
+	<sql id="search">
+		<if test="cri.searchType != null">
+			<if test="cri.searchType == 'c'.toString()">
+				and gb_content like CONCAT('%',#{cri.keyword},'%')
+			</if>
+			<if test="cri.searchType == 'w'.toString()">
+				and u_no like CONCAT('%',#{cri.keyword},'%')
+			</if>
+			<if test="cri.searchType == 'cw'.toString()">
+				and (gb_content like CONCAT('%',#{cri.keyword},'%') OR u_no
+				like
+				CONCAT('%',#{cri.keyword},'%'))
+			</if>
+			<if test="cri.searchType=='hash'.toString()">
+				and gb_no in
+				(select h_bno from tbl_hashtag where h_name
+				like CONCAT('%',#{cri.keyword},'%')
+				group by h_bno)
+			</if>
+		</if>
+	</sql>
+</mapper>
+
+

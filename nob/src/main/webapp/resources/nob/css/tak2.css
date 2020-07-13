@@ -1,0 +1,264 @@
+.article p, article p, .most-popular p {
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.85);
+}
+.article .time, .article .category, article .time, article .category, .most-popular .time, .most-popular .category {
+  font-size: 10px;
+  letter-spacing: .5px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.article {
+  margin-bottom: 35px;
+}
+
+article figure {
+  height: auto;
+  width: 100%;
+  overflow: hidden;
+  margin-bottom: 10px;
+  display: inline-block;
+}
+article figure img {
+  width: 100%;
+}
+article .detail {
+  display: flex;
+  display: -webkit-box;
+  display: -moz-box;
+}
+
+.article .inner {
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.15);
+}
+
+.article .padding {
+  padding: 2px;
+  padding-top: 0;
+}
+.article h2 {
+  text-transform: capitalize;
+  font-size: 20px;
+  margin: 0;
+  line-height: 28px;
+  margin-bottom: 10px;
+}
+.article h2 a {
+  color: #333;
+  text-decoration: none;
+}
+.article h2 a:hover {
+  color: #F73F52;
+}
+.article p {
+  line-height: 24px;
+  font-size: 14px;
+}
+
+article .detail {
+  display: flex;
+  margin-bottom: 5px;
+  font-size: 12px;
+}
+article .time, article .category {
+  margin: 0 10px;
+  color: #191E21;
+}
+article .category {
+  margin: 0 10px;
+}
+article .category a {
+  color: #F73F52;
+}
+article .time {
+  margin: 0;
+}
+article footer {
+  text-align: right;
+}
+article div .btn-primary {
+  background-color: transparent;
+  border-color: #F73F52;
+  color: #F73F52;
+  padding-left: 15px;
+  padding-right: 15px;
+  position: relative;
+  overflow: hidden;
+  transition: all .5s;
+  -moz-transition: all .5s;
+  -o-transition: all .5s;
+  -webkit-transition: all .5s;
+}
+article footer .btn-primary:after {
+  position: absolute;
+  content: ' ';
+  bottom: 0;
+  left: 20px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  transition: all .5s;
+  -moz-transition: all .5s;
+  -webkit-transition: all .5s;
+  -o-transition: all .5s;
+  z-index: -1;
+}
+article footer .btn-primary:hover {
+  color: #fff;
+}
+article footer .btn-primary:hover:after {
+  transform: scale(20);
+  -moz-transform: scale(20);
+  -webkit-transform: scale(20);
+  -o-transform: scale(20);
+  background-color: #F73F52;
+}
+article footer .btn-primary:focus {
+  outline: 0;
+}
+        .inner{
+            height: auto;
+            max-height: auto;
+            padding: 20px 0;
+                   }
+        .l_title{
+        	height: 40px;
+            max-height: 40px;
+        }
+        
+        
+        .article-list {
+  margin-bottom: 50px;
+  position: relative;
+}
+.article-list:last-child {
+  margin-bottom: 0;
+}
+.article-list .badge {
+  position: absolute;
+  top: 0;
+  right: 15px;
+  border-radius: 0;
+  background-color: #F73F52;
+}
+.article-list .inner {
+  display: inline-block;
+  width: 100%;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.15);
+}
+.article-list figure {
+  width: 300px;
+  height: 195px;
+  overflow: hidden;
+  background-color: #000;
+  float: left;
+  display: inline-block;
+  margin-bottom: 0;
+}
+.article-list figure img {
+  width: 100%;
+}
+.article-list .details {
+  padding: 5px;
+  margin-left: 315px;
+}
+.article-list .details .detail .category, .article-list .details .detail .time {
+  margin: 0 10px;
+}
+.article-list .details .detail .category {
+  margin: 0;
+}
+.article-list .details h1 {
+  margin: 0;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  font-size: 20px;
+  line-height: 28px;
+}
+.article-list .details h1 a {
+  color: #000;
+  text-decoration: none;
+  transition: all .5s;
+  -moz-transition: all .5s;
+  -webkit-transition: all .5s;
+  -o-transition: all .5s;
+}
+.article-list .details h1 a:hover {
+  color: #F73F52;
+}
+.article-list .details p {
+  line-height: 26px;
+}
+.article-list footer {
+  margin-top: 0;
+}	
+.love {
+  color: #989898;
+  float: left;
+  /* margin-top: 10px; */
+  position: relative;
+}
+.love i {
+  display: inline-block;
+  float: left;
+  margin-top: 1px;
+}
+.love i:before {
+  font-size: 28px;
+}
+.love span {
+  display: inline-block;
+  margin-left: 60px;
+  font-size: 14px;
+  margin-top: 5px;
+  margin-left: 5px;
+}
+.love.active {
+  color: #F73F52;
+}
+.love i.animated {
+  animation-name: love;
+  -webkit-animation-name: love;
+  -moz-animation-name: love;
+  -o-animation-name: love;
+  animation-fill-mode: backwards;
+  -moz-animation-fill-mode: backwards;
+  -o-animation-fill-mode: backwards;
+  -webkit-animation-fill-mode: backwards;
+  animation-duration: .5s;
+  -moz-animation-duration: .5s;
+  -webkit-animation-duration: .5s;
+  -o-animation-duration: .5s;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+.more {
+  overflow: hidden;
+  height: auto;
+  width: 80px;
+}
+.more span i:before {
+  font-size: 30px;
+}
+/* .more span {
+  transition: all 1s;
+  -moz-transition: all 1s;
+  -webkit-transition: all 1s;
+  -o-transition: all 1s;
+}
+.more span:last-child {
+  opacity: 0;
+}
+.more span:first-child {
+ margin-right:0px;
+}
+
+.more:hover span:last-child {
+  opacity: 1;
+}
+.more:hover span:first-child {
+  margin-top: -43px;
+  margin-right:80px;
+} */

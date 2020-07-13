@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nob.mapper.UserMapper">
+
+	<!-- 회원가입 -->
+	<insert id="createUser">
+		insert into tbl_user(u_email,u_pwd,u_name,u_nickname,u_gender,u_bmi)
+		values(#{u_email},#{u_pwd},#{u_name},#{u_nickname},#{u_gender},#{u_bmi})
+	</insert>
+	
+	<!-- 회원 정보 가져오기 -->
+	<select id="read" resultType="UserVO">
+		select
+		*
+		from tbl_user
+		where
+		u_no=#{uno}
+	</select>
+	
+	<select id="login" resultType="UserVO">
+		select
+		u_no,u_email,u_pwd,u_nickname,u_bmi
+		from
+		tbl_user
+		where
+		u_email=#{u_email}
+		and
+		u_pwd=#{u_pwd}
+	</select>
+	
+	<!-- 이메일 인증 확인 -->
+	<select id="isAuth" resultType="Integer">
+		select
+		count(*)
+		from
+		tbl_user
+		where
+		u_no=${uno}
+		and
+		u_Authkey="verified";
+	</select>
+	<!-- 이메일 중복확인 -->
+	<select id="email" resultType="Integer">
+		select
+		count(*)
+		from
+		tbl_user
+		where
+		u_email=#{email}
+	</select>
+	<!-- 닉네임 중복확인 -->
+	<select id="nickname" resultType="Integer">
+		select
+		count(*)
+		from
+		tbl_user
+		where
+		u_nickname=#{nickname}
+	</select>
+	<!-- 비밀번호 가져오기 -->
+	<select id="pwd" resultType="string">
+		select
+		u_pwd
+		from
+		tbl_user
+		where
+		u_email=#{email}
+	</select>
+	
+	<!-- 회원 삭제 -->
+	<delete id="delete">
+		delete from tbl_user
+		where 
+		u_no=#{userno}
+	</delete>
+	
+	<!-- 유효키로 회원찾기 -->
+	<select id="getAuth" resultType="UserVO">
+		select
+		u_no,u_email,u_nickname,u_Authkey
+		from
+		tbl_user
+		where
+		u_Authkey=#{authKey}
+	</select>
+	<!-- 이메일로 유효키 찾기 -->
+	<update id="setAuth">
+		update
+		tbl_user
+		set
+		u_Authkey=#{authKey}
+		where
+		u_email=#{email};
+	</update>
+	<!-- 회원 번호로 유효설정 -->
+	<update id="setVerify">
+		update
+		tbl_user
+		set
+		u_Authkey="verified"
+		where
+		u_no=#{uno};
+	</update>
+	
+	<!-- 06/22 회원 정보 -->
+	<!-- 비밀번호 가져오기에서 u_pwd로 변경(오타수정) -->
+	
+	<!-- 모든 회원 불러오기 -->
+	
+	<!-- 회원 정보 수정 -->
+	<update id="updateUser">
+		update tbl_user
+		set u_pwd=#{u_pwd},
+		u_bmi=#{u_bmi},
+		u_nickname=#{u_nickname}
+		where u_no=#{u_no}
+	</update>
+	<!-- 회원 탈퇴 -->
+	<update id="delUser">
+		update tbl_user
+		set 
+		u_email='',
+		u_pwd='',
+		u_name='',
+		u_gender='',
+		u_bmi=0,
+		u_AuthKey='deleted'
+		where
+		u_no=#{u_no}
+	</update>
+	
+	<!-- 06/26 -->
+	<select id="getUpdatedate" resultType="Integer">
+		select 
+		datediff(now(),u_updatedate)
+		from
+		tbl_user
+		where u_no=#{u_no};
+	</select>
+	<update id="updateUpdatedate">
+		update tbl_user
+		set u_updatedate=now()
+		where u_no=#{u_no}
+	</update>
+</mapper>

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nob.mapper.groupReplyMapper">
+
+	<select id="list" resultType="GroupReplyVO">
+		select
+		*
+		from
+		tbl_group_reply
+		where
+		gb_no = #{gb_no}
+		order by gr_id desc
+	</select>
+
+	<insert id="create">
+		insert into tbl_group_reply(gb_no, gr_content, u_no)
+		values(#{gb_no}, #{gr_content} ,#{u_no})
+	</insert>
+
+	<update id="update">
+		update tbl_group_reply set gr_content =
+		#{gr_content},
+		gr_regdate = now()
+		where gr_id = #{gr_id}
+	</update>
+
+	<delete id="delete">
+		delete from tbl_group_reply where gr_id =#{gr_id}
+	</delete>
+
+
+
+
+<select id="listPage" resultType="GroupReplyVO">
+		   select *,bb.u_no as l_user from
+      (select gr_id, gb_no ,gr_content,gr_regdate, u_no, IFNULL(l_total,"0") as
+      l_total, u_nickname
+      from (select
+      gr.gr_id, gr.gb_no, gr.gr_content, gr.gr_regdate, user.u_no, user.u_email, user.u_pwd, user.u_name, user.u_gender, 
+        user.u_nickname, user.u_bmi, user.u_joindate, user.u_Authkey, user.u_updatedate
+      from
+      tbl_group_reply as gr
+      left join tbl_user as user on gr.u_no = user.u_no
+      where gb_no
+      =#{gb_no}
+      order by gr_id desc) as a
+      left join( select count(*) as
+      l_total,l_bno from tbl_like where b_name='6'
+      group by l_bno) as b
+      on
+      a.gr_id = b.l_bno
+      where gr_id > 0
+      and gb_no = #{gb_no}
+      order by gr_id desc) as
+      aa
+      left join (select * from tbl_like where b_name='6' and u_no=#{u_no} group by
+      u_no,l_bno) as bb
+      on aa.gr_id=bb.l_bno
+      order by aa.gr_id desc
+      limit #{cri.groupPageStart}, #{cri.groupPerPage}
+	</select>
+
+	<select id="count" resultType="int">
+		select count(gb_no) from
+		tbl_group_reply
+		where gb_no =#{gb_no}
+	</select>
+
+	<select id="getGid" resultType="int">
+		select gr_id from tbl_group_reply
+		where
+		gb_no = #{gb_no}
+	</select>
+
+</mapper>
+

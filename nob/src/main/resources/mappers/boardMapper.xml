@@ -1,0 +1,481 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.nob.mapper.BoardMapper">
+
+	<select id="listSearch" resultType="com.nob.domain.BoardVO">
+		select * from (select *,total as r_total 
+		from <include refid="tbl"></include> as a
+        left join(
+        select count(*) as total,l_bno
+		from tbl_like
+        where b_name=<include refid="bnumber"></include>
+        group by l_bno) as b
+        on a.b_no =b.l_bno) as aa
+        left join (select * from tbl_user) bb
+        on bb.u_no=aa.u_no
+		where b_no>0
+		<include refid="search"></include>
+	<![CDATA[
+		order by b_no desc
+		limit #{cri.pageStart},#{cri.perPageNum}
+	]]>
+	</select>
+
+
+
+	
+
+	<select id="read" resultType="com.nob.domain.BoardVO">
+		select *
+		from
+		<include refid="tbl"></include> as a left join
+        tbl_user as b
+        on a.u_no=b.u_no
+		where b_no = #{b_no}
+	</select>
+
+	<insert id="create">
+		<include refid="register"></include>
+	</insert>
+
+	<update id="replycntupdate">
+		update
+		<include refid="tbl"></include>
+		as tbl set b_replycnt= (
+		select count(*)
+		as total
+		from tbl_reply as re
+		where re.b_name =
+		<include refid="bnumber"></include>
+		and re.b_no=tbl.b_no
+		group by b_no
+		)
+		where b_no>0
+	</update>
+
+	<delete id="delete">
+		delete from
+		<include refid="tbl"></include>
+		where b_no = #{b_no}
+	</delete>
+
+
+
+	<select id="listPage" resultType="com.nob.domain.BoardVO">
+		<!-- <![CDATA[ select * from tbl_tipboard where b_no>0 order by b_no desc, 
+			b_regdate desc limit #{page},10 ]]> -->
+	
+	<![CDATA[
+		select *, total as r_total from tbl_tipboard as a 
+		left join (select count(*) as total,l_bno from tbl_like left join tbl_tipboard on l_bno=b_no group by l_bno,b_name) as b
+		on a.b_no=l_bno
+		where b_no>0 order by b_no desc, b_regdate desc
+		limit #{page},10
+	]]>
+	</select>
+
+	<select id="listCriteria" resultType="com.nob.domain.BoardVO">
+	<![CDATA[
+		select * from tbl_tipboard where b_no>0 
+		order by b_no desc, b_regdate desc
+		limit #{pageStart},#{perPageNum}
+	]]>
+	</select>
+
+	<select id="countPaging" resultType="int">
+	
+		select count(b_no) from <include refid="tbl"></include> where b_no>0
+	
+	</select>
+
+
+	<select id="listSearchCount" resultType="int">
+	
+		select count(b_no) from <include refid="tbl"></include> 
+		where b_no>0
+		<include refid="search"></include>
+
+	</select>
+	<select id="likeTotal" resultType="com.nob.domain.BoardVO">
+		select count(*) as total,l_bno,b.b_name,b_title,b_viewcnt
+		from tbl_like a
+		left join
+		<include refid="tbl"></include>
+		b
+		on l_bno=b_no
+		and b.b_name=a.b_name
+		where b.b_name=
+		<include refid="bnumber"></include>
+		group by l_bno,b.b_name
+		order by total desc
+		limit 0,5
+	</select>
+
+	<select id="hashTotal" resultType="com.nob.domain.BoardVO">
+		select count(*) as total ,
+		h_name, b_name
+		from tbl_hashtag
+		group by b_name,h_name
+		order by total desc
+		
+	</select>
+	<select id="hashBoard" resultType="com.nob.domain.BoardVO">
+		select count(*) as total ,
+		h_name
+		from tbl_hashtag
+		where b_name= <include refid="bnumber"></include>
+		group by h_name
+		order by total desc
+		limit 0,10
+	</select>
+	
+	<select id="likeTotalAll" resultType="com.nob.domain.BoardVO">
+		select *
+		from (select * from tbl_tipboard
+		union select * from tbl_stiboard
+		union select * from tbl_qaboard
+		union select * from tbl_freeboard
+		) as fullboard
+		left join (select count(*) as total,l_bno,a.b_name as l_bname from
+		tbl_like as a left join tbl_tipboard on l_bno=b_no group by
+		l_bno,a.b_name) as total
+		on fullboard.b_no=l_bno
+		and fullboard.b_name = total.l_bname
+		where b_no>0
+		order by total desc
+		limit 0,5
+	</select>
+	<select id="newAll" resultType="com.nob.domain.BoardVO">
+		select *
+		from (select * from tbl_tipboard
+		union select * from tbl_stiboard
+		union
+		select * from tbl_qaboard
+		union select * from tbl_freeboard
+		) as
+		fullboard
+		order by b_regdate desc
+		limit 0,5
+	</select>
+
+
+	<update id="update">
+		update
+		<include refid="tbl"></include>
+		set b_title =#{bVO.b_title}, b_content =#{bVO.b_content},b_category=#{bVO.b_category}
+		where b_no =
+		#{bVO.b_no}
+	</update>
+
+	<update id="updateViewCnt">
+	update <include refid="tbl"></include> set b_viewcnt = b_viewcnt +1 where b_no = #{b_no}
+	</update>	
+
+
+
+	<!-- 06/18 image like -->
+	<!-- 2018_06_18 추가 -->
+	<select id="liketest" resultType="com.nob.domain.LikeVO">
+		select count(*) as t_total from
+		tbl_like
+		where b_name =<include refid="bnumber"></include>
+		and l_bno = #{l_bno}
+		and u_no = #{u_no}
+	</select>
+	<!-- 2018_06_18 추가 -->
+	<insert id="like">
+		insert into tbl_like(u_no, l_bno ,b_name) values
+		(#{u_no}, #{l_bno}, <include refid="bnumber"></include>);
+	</insert>
+
+	<!-- 2018_06_14 추가 -->
+	<insert id="addAttach">
+		insert into tbl_attachfile(fullname, b_no, b_name) values
+		(#{fullName}, LAST_INSERT_ID(), "2")<!-- "2"는 b_name으로, b_name을 tipboard로 
+			임의로 저장한 것임 -->
+	</insert>
+
+
+	<!-- 2018_06_14 추가 -->
+	<delete id="deleteAttach">
+		delete from tbl_attachfile where b_no = #{b_no}
+	</delete>
+
+	<!-- 2018_06_14 추가 -->
+	<insert id="replaceAttach">
+		insert into tbl_attachfile(fullname, b_no, b_name) values
+		(#{fullName}, #{b_no}, "2")<!-- "2"는 b_name으로, b_name을 tipboard로 임의로 저장한 
+			것임 -->
+	</insert>
+	<!-- 2018_06_14 추가 -->
+<!-- 	<select id="likeReadTotal" resultType="com.nob.domain.LikeVO">
+		select *,ifnull(b.cou,0) as l_total from <include refid="tbl"></include> as a
+        left join (select
+		*,count(*) as cou 
+		from
+		tbl_like
+        where l_bno=#{l_bno}
+        and b_name=<include refid="bnumber"></include>
+		group by l_bno,b_name) as b
+        on a.<include refid="bno"></include>=b.l_bno
+        where <include refid="bno"></include>=#{l_bno};
+	</select>  -->
+	<select id="likeReadTotal" resultType="com.nob.domain.LikeVO">
+		select *,ifnull(b.cou,0) as l_total from
+		<include refid="tbl"></include>
+		as a
+		left join (select
+		*,count(*) as cou
+		from
+		tbl_like
+		where l_bno=#{l_bno}
+		and b_name=
+		<include refid="bnumber"></include>
+		group by l_bno,b_name) as b
+		on a.
+		<include refid="bno"></include>
+		=b.l_bno
+		where
+		<include refid="bno"></include>
+		=#{l_bno};
+	</select>
+	
+		<select id="likeTotal3" resultType="com.nob.domain.LikeVO">
+		select *,ifnull(b.cou,0) as l_total from tbl_group_reply as a
+		left join (select
+		*,count(*) as cou
+		from
+		tbl_like
+		where l_bno=#{l_bno}
+		and b_name=6
+		group by l_bno,b_name) as b
+		on a.gr_id =b.l_bno
+		where gr_id=#{l_bno};
+	</select>
+	
+	
+	
+	<!--  Hash tag -->
+	<!-- 2018_06_19 추가 -->
+	<insert id = "hashInsert">
+		insert into tbl_hashtag(h_bno, b_name, h_name) values (LAST_INSERT_ID(), <include refid="bnumber"></include>, #{h_name})
+	</insert>
+	<!-- 2018_06_19 추가 -->
+	<select id = "hashSelect" resultType = "com.nob.domain.HashtagVO">
+		select h_name from tbl_hashtag where b_name = <include refid="bnumber"></include> and h_bno = #{h_bno}
+	</select>
+	<!-- 2018_06_19 추가 -->
+	<insert id = "hashModify">
+	insert into tbl_hashtag(h_bno, b_name, h_name) values (#{h_bno}, <include refid="bnumber"></include>, #{h_name})
+	</insert>
+	<!-- 2018_06_19 추가 -->
+	<delete id = "hashDelete">
+		delete from tbl_hashtag where h_bno = #{h_bno} and b_name =<include refid="bnumber"></include>
+	</delete>
+	<!--  MainIndex Image Board -->
+	<select id= "main_sti" resultType="com.nob.domain.BoardVO">
+		 select * from tbl_stiboard  as a
+ left join (select *,count(*) as total from tbl_like where b_name='1' group by b_name,l_bno) as b
+ on a.b_no=b.l_bno
+ order by b_regdate desc limit 0,6
+	</select>
+	
+	<!-- 해당 글 해쉬리스트 출력 -->
+	<select id="hashList" resultType="com.nob.domain.BoardVO">
+		
+		select * from tbl_hashtag where b_name='2' 
+		and h_bno=#{b_no}
+	
+	</select>
+	
+	<!-- 2018_07_04 modify -->	
+	<insert id="likeReplyInsert">
+		insert into tbl_like(u_no, l_bno ,b_name) values
+		(#{u_no}, #{l_bno},
+		<include refid="replynumber"></include>
+		)
+	</insert>
+
+
+<!-- 2018_07_04 modify -->
+	<delete id="likeReplyDelete">
+		delete from
+		tbl_like
+		where b_name =
+		<include refid="replynumber"></include>
+		and l_bno = #{l_bno}
+		and u_no = #{u_no}
+	</delete>
+<!-- 2018_07_04 modify -->
+<select id="likeReplyTotal" resultType="com.nob.domain.LikeVO">
+		select *,ifnull(b.cou,0) as l_total from tbl_reply as a
+		left join (select
+		*,count(*) as cou
+		from
+		tbl_like
+		where l_bno=#{l_bno}
+		and b_name=<include refid="replynumber"></include>
+		group by
+		l_bno,b_name) as b
+		on a.r_id =b.l_bno
+		where r_id=#{l_bno};
+
+	</select>
+	
+	
+	<delete id="likedelete">
+      delete from
+      tbl_like
+      where b_name =
+      <include refid="bnumber"></include>
+      and l_bno = #{l_bno}
+      and u_no = #{u_no}
+   </delete>
+	
+	
+
+	<sql id="tbl">
+		<if test="tbl_name != null">
+			<if test="tbl_name == 'tbl_tipboard'.toString()">
+				tbl_tipboard
+			</if>
+			<if test="tbl_name == 'tbl_freeboard'.toString()">
+				tbl_freeboard
+			</if>
+			<if test="tbl_name == 'tbl_stiboard'.toString()">
+				tbl_stiboard
+			</if>
+			<if test="tbl_name == 'tbl_qaboard'.toString()">
+				tbl_qaboard
+			</if>
+			<if test="tbl_name == 'tbl_group_board'.toString()">
+				tbl_group_board
+			</if>
+			<if test="tbl_name == 'tbl_group_reply'.toString()">
+				tbl_group_reply
+			</if>
+			<if test="tbl_name == 'tbl_event'.toString()">
+				tbl_event
+			</if>
+			<if test="tbl_name == 'tbl_notice'.toString()">
+				tbl_notice
+			</if>
+		</if>
+	</sql>
+	<sql id="register">
+		<if test="tbl_name != null">
+			<if test="tbl_name == 'tbl_event'.toString()">
+				insert into <include refid="tbl"></include> (b_title, b_content, u_no,
+				b_category,thumbnailimage,b_date)
+				values(#{bVO.b_title},#{bVO.b_content}, #{bVO.u_no}, #{bVO.b_category},#{bVO.thumbnailimage},#{bVO.b_date})
+			</if>
+			<if test="tbl_name != 'tbl_event'.toString()">
+				insert into <include refid="tbl"></include> (b_title, b_content, u_no,
+				b_category,thumbnailimage)
+				values(#{bVO.b_title},#{bVO.b_content}, #{bVO.u_no}, #{bVO.b_category},#{bVO.thumbnailimage})
+			</if>
+		</if>
+	</sql>
+	<!-- 2018_07_04 modify -->
+	
+<!-- 2018_07_04 modify -->
+	<sql id="bno">
+		<if test="tbl_name != null">
+			<if test="tbl_name == 'tbl_group_board'.toString()">
+				gb_no
+			</if>
+			<if test="tbl_name != 'tbl_group_board'.toString()">
+				b_no
+			</if>
+		</if>
+	</sql>
+
+	<sql id="bnumber">
+		<if test="tbl_name != null">
+			<if test="tbl_name == 'tbl_tipboard'.toString()">
+				'2'
+			</if>
+			<if test="tbl_name == 'tbl_freeboard'.toString()">
+				'4'
+			</if>
+			<if test="tbl_name == 'tbl_stiboard'.toString()">
+				'1'
+			</if>
+			<if test="tbl_name == 'tbl_qaboard'.toString()">
+				'3'
+			</if>
+			<if test="tbl_name == 'tbl_group_board'.toString()">
+				'5'
+			</if>
+			<if test="tbl_name == 'tbl_group_reply'.toString()">
+				'6'
+			</if>
+			<if test="tbl_name == 'tbl_notice'.toString()">
+				'7'
+			</if>
+		</if>
+	</sql>
+
+
+	<sql id="search">
+		<if test="searchType != null">
+			<if test="searchType == 't'.toString()">
+				and b_title like CONCAT('%',#{keyword},'%')
+			</if>
+
+			<if test="searchType == 'c'.toString()">
+				and b_content like CONCAT('%',#{keyword},'%')
+			</if>
+		<!-- 	<if test="searchType == 'w'.toString()">
+				and u_nickname like CONCAT('%',#{keyword},'%')
+			</if> -->
+			<if test="searchType == 'tc'.toString()">
+				and (b_title like CONCAT('%',#{keyword},'%') OR b_content
+				like
+				CONCAT('%',#{keyword},'%'))
+			</if>
+			<if test="searchType == 'cw'.toString()">
+				and (b_content like CONCAT('%',#{keyword},'%') OR u_no
+				like
+				CONCAT('%',#{keyword},'%'))
+			</if>
+			<if test="searchType == 'tcw'.toString()">
+				and (b_title like CONCAT('%',#{keyword},'%') OR
+				b_content
+				like
+				CONCAT('%',#{keyword},'%') OR
+				u_no like
+				CONCAT('%',#{keyword},'%'))
+			</if>
+			<if test="searchType=='hash'.toString()">
+				and b_no in
+				(select h_bno from tbl_hashtag where h_name like CONCAT('%',#{keyword},'%')
+				group by h_bno)
+			</if>
+			<if test="searchType=='ca'.toString()">
+				and b_category like CONCAT('%',#{keyword},'%')
+			</if>
+		</if>
+	</sql>
+<sql id="replynumber">
+		<if test="tbl_name != null">
+			<if test="tbl_name == 'tbl_tipboard'.toString()">
+				'10'
+			</if>
+			<if test="tbl_name == 'tbl_freeboard'.toString()">
+				'12'
+			</if>
+			<if test="tbl_name == 'tbl_stiboard'.toString()">
+				'9'
+			</if>
+			<if test="tbl_name == 'tbl_qaboard'.toString()">
+				'11'
+			</if>
+		</if>
+	</sql>
+	
+</mapper>

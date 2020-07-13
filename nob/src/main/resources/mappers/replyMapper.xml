@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nob.mapper.ReplyMapper">
+
+	<select id="list" resultType="ReplyVO">
+		select *
+		from tbl_reply as re 
+		left join tbl_user as user on re.u_no = user.u_no
+		where b_no = #{b_no}
+		and
+		b_name = #{b_name}
+		order by r_id desc
+	</select>
+
+	<insert id="create">
+		insert into tbl_reply (b_no, r_content, u_no, b_name)
+		values (#{b_no},#{r_content},#{u_no},<include refid="bnumber"></include>)
+	</insert>
+
+	<update id="update">
+		update tbl_reply set r_content = #{r_content},
+		r_regdate = now()
+		where r_id = #{r_id}
+	</update>
+
+	<delete id="delete">
+		delete from tbl_reply where r_id =#{r_id}
+	</delete>
+
+	
+		
+	
+	<!-- 2018_07_04 modify -->
+	<select id="listPage" resultType="ReplyVO">
+		select *,bb.u_no as l_user from
+      (select r_id, b_no ,r_content,r_regdate, u_no, IFNULL(l_total,"0") as
+      l_total, u_nickname
+      from (
+      select
+      re.r_id, re.b_no, re.b_name, re.r_content, re.r_regdate, user.u_no, user.u_email, user.u_pwd, user.u_name, user.u_gender, 
+        user.u_nickname, user.u_bmi, user.u_joindate, user.u_Authkey
+      from
+      tbl_reply as re 
+      left join tbl_user as user on re.u_no = user.u_no
+      where
+      b_no = #{b_no}
+      and b_name
+      = <include refid="bnumber"></include>
+      order by r_id desc
+        ) as a
+      left join( select count(*) as
+      l_total,l_bno from tbl_like where b_name=<include refid="replynumber"></include>
+      group by l_bno) as b
+      on
+      a.r_id = b.l_bno
+      where r_id > 0
+      and b_no = #{b_no}
+      order by r_id desc) 
+        as aa
+      left join (select * from tbl_like where b_name=<include refid="replynumber"></include> and u_no=#{u_no}
+        group by
+      u_no,l_bno) as bb
+      on aa.r_id=bb.l_bno
+        order by aa.r_id desc
+      limit #{cri.pageStart}, #{cri.perPageNum}
+		
+	</select>
+
+	<select id="count" resultType="int">
+		select count(b_no) from tbl_reply
+		where b_no =#{b_no} and b_name = <include refid="bnumber"></include>
+	</select>
+
+
+	<select id="getBno" resultType="int">
+		select b_no from tbl_reply where r_id = #{r_id}
+	</select>
+ <sql id="tbl">
+	<if test="tbl_name != null">
+		<if test="tbl_name == 'tbl_tipboard'.toString()">
+tbl_tipboard
+		</if>
+		<if test="tbl_name == 'tbl_freeboard'.toString()">
+tbl_freeboard
+		</if>
+		<if test="tbl_name == 'tbl_stiboard'.toString()">
+tbl_stiboard
+		</if>
+		<if test="tbl_name == 'tbl_qaboard'.toString()">
+tbl_qaboard
+		</if>
+	</if>
+</sql> 
+
+ <sql id="bnumber">
+	<if test="tbl_name != null">
+		<if test="tbl_name == 'tbl_tipboard'.toString()">
+'2'
+		</if>
+		<if test="tbl_name == 'tbl_freeboard'.toString()">
+'4'
+		</if>
+		<if test="tbl_name == 'tbl_stiboard'.toString()">
+'1'
+		</if>
+		<if test="tbl_name == 'tbl_qaboard'.toString()">
+'3'
+		</if>
+	</if>
+</sql> 
+<!-- 2018_07_04 modify -->
+<sql id="replynumber">
+	<if test="tbl_name != null">
+		<if test="tbl_name == 'tbl_tipboard'.toString()">
+'10'
+		</if>
+		<if test="tbl_name == 'tbl_freeboard'.toString()">
+'12'
+		</if>
+		<if test="tbl_name == 'tbl_stiboard'.toString()">
+'9'
+		</if>
+		<if test="tbl_name == 'tbl_qaboard'.toString()">
+'11'
+		</if>
+	</if>
+</sql> 
+</mapper>
+
